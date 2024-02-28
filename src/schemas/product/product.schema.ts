@@ -7,19 +7,19 @@ export type ProductDocument = HydratedDocument<Product>;
 
 @Schema()
 export class Product {
-  @Prop()
+  @Prop({ required: true })
   name: string;
 
-  @Prop()
+  @Prop({ required: true })
   price: number;
 
-  @Prop()
+  @Prop({ required: true })
   description: string;
 
-  @Prop()
+  @Prop({ required: true })
   imageUrl: string;
 
-  @Prop()
+  @Prop({ required: true, default: 0 })
   averageRating: number;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })

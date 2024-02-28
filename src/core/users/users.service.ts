@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { hash } from 'bcrypt';
 import { Model } from 'mongoose';
@@ -27,15 +27,13 @@ export class UsersService {
       ...createUserDto,
       password: await hash(createUserDto.password, 10),
     });
-    const savedUser = await createdUsers.save();
+    const savedUser = (await createdUsers.save()).toObject();
 
     // Extract created user without password
-    // Convert the Mongoose document to a plain JavaScript object
-    const createdUser = savedUser.toObject();
 
     // Exclude the 'password' field
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...userWithoutPassword } = createdUser;
+    const { password, ...userWithoutPassword } = savedUser;
 
     console.log(userWithoutPassword);
 
@@ -71,12 +69,9 @@ export class UsersService {
    */
   async findByUsername(username: string) {
     const user = await this.userModel.find({ username: username }).exec();
+    if (!user) throw new NotFoundException('User Profile Not Found');
     return user[0];
   }
-
-  //   if (!user) throw new NotFoundException('User Profile Not Found');
-  //   return user;
-  // }
 
   // async findByUsernameWithPosts(username: string, userId: string) {
   //   const userWithPosts = await this.db.query.users.findFirst({

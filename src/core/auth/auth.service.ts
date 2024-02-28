@@ -16,30 +16,30 @@ export class AuthService {
 
   async loginUser(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto);
+    const payload = {
+      id: user._id,
+      username: user.username,
+      sub: {
+        name: user.fullName,
+      },
+    };
 
-    const userObject = user.toObject();
-    // const payload = {
-    //   id: user._id.toString(),
-    //   username: user.username,
-    //   sub: {
-    //     name: user.fullName,
-    //   },
-    // };
-
-    // return {
-    //   user,
-    //   backendTokens: {
-    //     accessToken: await this.jwtService.signAsync(payload, {
-    //       expiresIn: '5h',
-    //       secret: config.jwtSecretKey,
-    //     }),
-    //     expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
-    //   },
-    // };
+    return {
+      user,
+      jwtTokens: {
+        accessToken: await this.jwtService.signAsync(payload, {
+          expiresIn: '5h',
+          secret: config.jwtSecretKey,
+        }),
+        expiresIn: new Date().setTime(new Date().getTime() + EXPIRE_TIME),
+      },
+    };
   }
 
   async validateUser(loginDto: LoginDto) {
-    const user = await this.usersService.findByUsername(loginDto.username);
+    const user = (
+      await this.usersService.findByUsername(loginDto.username)
+    ).toObject();
     if (user && (await compare(loginDto.password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password: _, ...result } = user;
